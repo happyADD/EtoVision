@@ -1,11 +1,11 @@
 #include "opencv2/opencv.hpp"
 #include "string"
 using namespace cv;
-#define HUMAN
-void templates_init(std::vector<Mat>& templates);
+// #define HUMAN
+void Templates_Init(std::vector<Mat>& templates);
 void print_chessboard();
-bool is_Can_Cancelled(int x1, int y1, int x2, int y2);
-
+bool Can_Cancelled(int x1, int y1, int x2, int y2);
+void print_acccuracy();
 int chessboard[12][9];
 int a[10][7];
 double b[10][7];
@@ -15,7 +15,7 @@ int main()
     std::vector<Mat> templates;
     Mat example = imread("/home/dcy/CLionProjects/EtoVision/example.jpg");
     Mat result, N;
-    templates_init(templates);
+    Templates_Init(templates);
     cvtColor(example(Rect(60, 460, 750, 1020)), example, COLOR_BGR2GRAY);
 
     Mat pic[7][10];
@@ -47,6 +47,7 @@ int main()
     for (int i = 1; i < 11; ++i)
         for (int j = 1; j < 8; ++j)
             chessboard[i][j] = a[i - 1][j - 1];
+    print_acccuracy();
     print_chessboard();
 #ifdef HUMAN
     std::cout << "Recognize Finished! Now is in User Mode." << std::endl;
@@ -57,7 +58,7 @@ int main()
         std::cout << "Please enter two points likes this: x1 y1 x2 y2" << std::endl;
         int x1, y1, x2, y2;
         std::cin >> x1 >> y1 >> x2 >> y2;
-        if (is_Can_Cancelled(x1, y1, x2, y2))
+        if (Can_Cancelled(x1, y1, x2, y2))
         {
             std::cout << "Can be cancelled!" << std::endl;
             chessboard[y1 + 1][x1 + 1] = -1;
@@ -75,39 +76,56 @@ int main()
 
 #else
     std::cout << "Recognize Finished! Now is in Algorithm Mode." << std::endl;
-    int x=1,y=1,cnt=0;
-    while(x<8 && y<11)
+    int Cancellation_cnt = 0;
+    while (Cancellation_cnt != 70)
     {
-        for (int i = 1; i < 11; ++i)
-            for(int j = 1; j < 8; ++j)
+        for (int y1 = 0; y1 < 10; ++y1)
+        {
+            for (int x1 = 0; x1 < 7; ++x1)
             {
-                if(chessboard[i][j] == chessboard[y][x] && is_Can_Cancelled(x,y,j,i))
+                if(chessboard[y1 + 1][x1 + 1] == -1) continue;
+                if (chessboard[y1 + 1][x1 + 1] != -1)
                 {
-                    chessboard[y][x] = -1;
-                    chessboard[i][j] = -1;
-                    x++;
-                    if(x==8)
+                    for (int y2 = 0; y2 < 10; ++y2)
                     {
-                        x=1;
-                        y++;
+                        for (int x2 = 0; x2 < 7; ++x2)
+                        {
+                            if (chessboard[y2 + 1][x2 + 1] == -1) continue;
+                            if (chessboard[y2 + 1][x2 + 1] != -1)
+                            {
+                                if (Can_Cancelled(x1, y1, x2, y2))
+                                {
+                                    if (Can_Cancelled(x1, y1, x2, y2))
+                                    {
+                                        chessboard[y2 + 1][x2 + 1] = -1;
+                                        chessboard[y1 + 1][x1 + 1] = -1;
+
+                                        std::cout << "Cancel two points: (" << x1 << "," << y1 << ") and (" << x2 << "," <<
+                                            y2 << ")" << std::endl;
+                                        Cancellation_cnt += 2;
+                                        // for (auto& m : chessboard)
+                                        // {
+                                        //     for (int n : m)
+                                        //         std::cout << n << "\t ";
+                                        //     std::cout << std::endl;
+                                        // }
+                                        print_chessboard();
+                                    }
+                                }
+                            }
+                        }
                     }
-                    cnt++;
-                    std::cout << "Algorithm cancel " << x - 1 << " " << y - 1 << " " << j - 1 << " " << i - 1 << std::endl;
                 }
             }
-        if(cnt==70)
-        {
-            std::cout << "Algorithm Cancelled Finished!" << std::endl;
-            break;
         }
+        std::cout<<std::endl<<"The Algorithm finished the Cancellation!"<<std::endl;
     }
+
 #endif
-
-
     return 0;
 }
 
-void templates_init(std::vector<Mat>& templates)
+void Templates_Init(std::vector<Mat>& templates)
 {
     Mat temp[7];
     cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/0.jpg"), temp[0], COLOR_BGR2GRAY);
@@ -162,20 +180,41 @@ void print_chessboard()
         std::cout << "row " << i - 1 << ":\t";
         for (int j = 1; j < 8; ++j)
         {
-            std::cout << chessboard[i][j] << "\t";
+            if (chessboard[i][j] == -1)
+                std::cout << "  \t";
+            else std::cout << chessboard[i][j] << "\t";
         }
         std::cout << std::endl;
     }
 }
 
-bool is_Can_Cancelled(int x1, int y1, int x2, int y2)
+bool Can_Cancelled(int x1, int y1, int x2, int y2)
 {
     x1 = x1 + 1;
     y1 = y1 + 1;
     x2 = x2 + 1;
     y2 = y2 + 1;
-    bool flag = false;
-
+    if (x1 == x2 && y1 == y2)
+    {
+#ifdef HUMAN
+        std::cout << "The two points are same!" << std::endl;
+#endif
+        return false;
+    }
+    if (chessboard[y1][x1] == -1 || chessboard[y2][x2] == -1)
+    {
+#ifdef HUMAN
+        std::cout << "There is nothing at one of the points!" << std::endl;
+#endif
+        return false;
+    }
+    if (chessboard[y1][x1] != chessboard[y2][x2])
+    {
+#ifdef HUMAN
+        std::cout << "The two points are not same!" << std::endl;
+#endif
+        return false;
+    }
     int temp11[9] = {0}, temp12[9] = {0};
     for (int i = x1 - 1; i >= 0; i--) //向左搜索
     {
@@ -212,7 +251,7 @@ bool is_Can_Cancelled(int x1, int y1, int x2, int y2)
                 for (int j = y2 + 1; j < y1; j++)
                     if (chessboard[j][i] != -1) temp11[i] = temp12[i] = 0;
             }
-            if (temp11[i] && temp12[i]) flag = true;
+            if (temp11[i] && temp12[i]) return true;
         }
 
 
@@ -252,9 +291,9 @@ bool is_Can_Cancelled(int x1, int y1, int x2, int y2)
                 for (int j = x2 + 1; j < x1; ++j)
                     if (chessboard[i][j] != -1) temp21[i] = temp22[i] = 0;
             }
-            if (temp21[i] && temp22[i]) flag = true;
+            if (temp21[i] && temp22[i]) return true;
         }
-    return flag;
+    return false;
 }
 
 
