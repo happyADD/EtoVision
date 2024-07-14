@@ -50,7 +50,9 @@ int main()
     print_chessboard();
 #ifdef HUMAN
     std::cout << "Recognize Finished! Now is in User Mode." << std::endl;
-    while (1)
+    bool isfinish = false;
+    int cnt = 0;
+    while (!isfinish)
     {
         std::cout << "Please enter two points likes this: x1 y1 x2 y2" << std::endl;
         int x1, y1, x2, y2;
@@ -61,15 +63,44 @@ int main()
             chessboard[y1 + 1][x1 + 1] = -1;
             chessboard[y2 + 1][x2 + 1] = -1;
             print_chessboard();
-        }else
+            cnt += 2;
+        }
+        else
         {
             std::cout << "Can not be cancelled!" << std::endl;
             print_chessboard();
         }
+        if (cnt == 70) isfinish = true;
     }
 
 #else
-
+    std::cout << "Recognize Finished! Now is in Algorithm Mode." << std::endl;
+    int x=1,y=1,cnt=0;
+    while(x<8 && y<11)
+    {
+        for (int i = 1; i < 11; ++i)
+            for(int j = 1; j < 8; ++j)
+            {
+                if(chessboard[i][j] == chessboard[y][x] && is_Can_Cancelled(x,y,j,i))
+                {
+                    chessboard[y][x] = -1;
+                    chessboard[i][j] = -1;
+                    x++;
+                    if(x==8)
+                    {
+                        x=1;
+                        y++;
+                    }
+                    cnt++;
+                    std::cout << "Algorithm cancel " << x - 1 << " " << y - 1 << " " << j - 1 << " " << i - 1 << std::endl;
+                }
+            }
+        if(cnt==70)
+        {
+            std::cout << "Algorithm Cancelled Finished!" << std::endl;
+            break;
+        }
+    }
 #endif
 
 
@@ -116,7 +147,7 @@ void print_acccuracy()
 
 void print_chessboard()
 {
-    std::cout << "+-->x" << std::endl;
+    std::cout << "+————>x" << std::endl;
     std::cout << "|  " << std::endl;
     std::cout << "v  " << std::endl;
     std::cout << "y  " << std::endl;
@@ -144,88 +175,85 @@ bool is_Can_Cancelled(int x1, int y1, int x2, int y2)
     x2 = x2 + 1;
     y2 = y2 + 1;
     bool flag = false;
-    if (y1 - y2)
+
+    int temp11[9] = {0}, temp12[9] = {0};
+    for (int i = x1 - 1; i >= 0; i--) //向左搜索
     {
-        int temp1[9] = {0}, temp2[9] = {0};
-        for (int i = x1 - 1; i >= 0; i--) //向左搜索
-        {
-            if (chessboard[y1][i] != -1) break;
-            temp1[i] = 1; //1为可行区域，0为有阻挡
-        }
-        for (int i = x1 + 1; i < 7; i++) //向右搜索
-        {
-            if (chessboard[y1][i] != -1) break;
-            temp1[i] = 1;
-        } //以上对p1判断
-        for (int i = x2 - 1; i >= 0; i--) //向左搜索
-        {
-            if (chessboard[y2][i] != -1) break;
-            temp2[i] = 1;
-        }
-        for (int i = x2 + 1; i < 7; i++) //向右搜索
-        {
-            if (chessboard[y2][i] != -1) break;
-            temp2[i] = 1;
-        }
-        temp1[x1] = 1;
-        temp2[x2] = 1;
-        for (int i = 0; i < 9; i++) //判断是否可以连接
-            if (temp1[i] && temp2[i])
-            {
-                if (y1 < y2)
-                {
-                    for (int j = y1 + 1; j < y2; j++)
-                        if (chessboard[j][i] != -1) temp1[i] = temp2[i] = 0;
-                }
-                else
-                {
-                    for (int j = y2 + 1; j < y1; j++)
-                        if (chessboard[j][i] != -1) temp1[i] = temp2[i] = 0;
-                }
-                if (temp1[i] && temp2[i]) flag = true;
-            }
+        if (chessboard[y1][i] != -1) break;
+        temp11[i] = 1; //1为可行区域，0为有阻挡
     }
-    else //if (y1 - y2)
+    for (int i = x1 + 1; i < 9; i++) //向右搜索
     {
-        int temp1[12] = {0}, temp2[12] = {0};
-        for (int i = y1 - 1; i >= 0; i--) //向上搜索
-        {
-            if (chessboard[i][x1] != -1) break;
-            temp1[i] = 1;
-        }
-        for (int i = y1 + 1; i < 10; i++) //向下搜索
-        {
-            if (chessboard[i][x1] != -1) break;
-            temp1[i] = 1;
-        } //p1
-        for (int i = y2 - 1; i >= 0; i--) //up
-        {
-            if (chessboard[i][x2] != -1) break;
-            temp2[i] = 1;
-        }
-        for (int i = y2 + 1; i < 10; i++) //down
-        {
-            if (chessboard[i][x2] != -1) break;
-            temp2[i] = 1;
-        }
-        temp1[y1] = 1;
-        temp2[y2] = 1;
-        for (int i = 0; i < 12; i++)
-            if (temp1[i] && temp2[i])
-            {
-                if (x1 < x2)
-                {
-                    for (int j = x1 + 1; j < x2; ++j)
-                        if (chessboard[i][j] != -1) temp1[i] = temp2[i] = 0;
-                }
-                else
-                {
-                    for (int j = x2 + 1; j < x1; ++j)
-                        if (chessboard[i][j] != -1) temp1[i] = temp2[i] = 0;
-                }
-                if (temp1[i] && temp2[i]) flag = true;
-            }
+        if (chessboard[y1][i] != -1) break;
+        temp11[i] = 1;
+    } //以上对p1判断
+    for (int i = x2 - 1; i >= 0; i--) //向左搜索
+    {
+        if (chessboard[y2][i] != -1) break;
+        temp12[i] = 1;
     }
+    for (int i = x2 + 1; i < 9; i++) //向右搜索
+    {
+        if (chessboard[y2][i] != -1) break;
+        temp12[i] = 1;
+    }
+    temp11[x1] = 1;
+    temp12[x2] = 1;
+    for (int i = 0; i < 9; i++) //判断是否可以连接
+        if (temp11[i] && temp12[i])
+        {
+            if (y1 < y2)
+            {
+                for (int j = y1 + 1; j < y2; j++)
+                    if (chessboard[j][i] != -1) temp11[i] = temp12[i] = 0;
+            }
+            else
+            {
+                for (int j = y2 + 1; j < y1; j++)
+                    if (chessboard[j][i] != -1) temp11[i] = temp12[i] = 0;
+            }
+            if (temp11[i] && temp12[i]) flag = true;
+        }
+
+
+    int temp21[12] = {0}, temp22[12] = {0};
+    for (int i = y1 - 1; i >= 0; i--) //向上搜索
+    {
+        if (chessboard[i][x1] != -1) break;
+        temp21[i] = 1;
+    }
+    for (int i = y1 + 1; i < 12; i++) //向下搜索
+    {
+        if (chessboard[i][x1] != -1) break;
+        temp21[i] = 1;
+    } //p1
+    for (int i = y2 - 1; i >= 0; i--) //up
+    {
+        if (chessboard[i][x2] != -1) break;
+        temp22[i] = 1;
+    }
+    for (int i = y2 + 1; i < 12; i++) //down
+    {
+        if (chessboard[i][x2] != -1) break;
+        temp22[i] = 1;
+    }
+    temp21[y1] = 1;
+    temp22[y2] = 1;
+    for (int i = 0; i < 12; i++)
+        if (temp21[i] && temp22[i])
+        {
+            if (x1 < x2)
+            {
+                for (int j = x1 + 1; j < x2; ++j)
+                    if (chessboard[i][j] != -1) temp21[i] = temp22[i] = 0;
+            }
+            else
+            {
+                for (int j = x2 + 1; j < x1; ++j)
+                    if (chessboard[i][j] != -1) temp21[i] = temp22[i] = 0;
+            }
+            if (temp21[i] && temp22[i]) flag = true;
+        }
     return flag;
 }
 
