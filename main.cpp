@@ -1,5 +1,6 @@
 #include "opencv2/opencv.hpp"
 #include "string"
+
 using namespace cv;
 // #define HUMAN
 void Templates_Init(std::vector<Mat>& templates);
@@ -13,11 +14,12 @@ double b[10][7];
 int main()
 {
     std::vector<Mat> templates;
-    Mat example = imread("/home/dcy/CLionProjects/EtoVision/example.jpg");
+
+    Mat example = imread("../example.jpg");
     Mat result, N;
     Templates_Init(templates);
     cvtColor(example(Rect(60, 460, 750, 1020)), example, COLOR_BGR2GRAY);
-
+    normalize(example, example, 0, 255, NORM_MINMAX, CV_8UC1);
     Mat pic[7][10];
 
     for (int i = 0; i < 7; ++i)
@@ -83,7 +85,7 @@ int main()
         {
             for (int x1 = 0; x1 < 7; ++x1)
             {
-                if(chessboard[y1 + 1][x1 + 1] == -1) continue;
+                if (chessboard[y1 + 1][x1 + 1] == -1) continue;
                 if (chessboard[y1 + 1][x1 + 1] != -1)
                 {
                     for (int y2 = 0; y2 < 10; ++y2)
@@ -95,22 +97,20 @@ int main()
                             {
                                 if (Can_Cancelled(x1, y1, x2, y2))
                                 {
-                                    if (Can_Cancelled(x1, y1, x2, y2))
-                                    {
-                                        chessboard[y2 + 1][x2 + 1] = -1;
-                                        chessboard[y1 + 1][x1 + 1] = -1;
+                                    chessboard[y2 + 1][x2 + 1] = -1;
+                                    chessboard[y1 + 1][x1 + 1] = -1;
 
-                                        std::cout << "Cancel two points: (" << x1 << "," << y1 << ") and (" << x2 << "," <<
-                                            y2 << ")" << std::endl;
-                                        Cancellation_cnt += 2;
-                                        // for (auto& m : chessboard)
-                                        // {
-                                        //     for (int n : m)
-                                        //         std::cout << n << "\t ";
-                                        //     std::cout << std::endl;
-                                        // }
-                                        print_chessboard();
-                                    }
+                                    std::cout << "Cancel two points: (" << x1 << "," << y1 << ") and (" << x2 << ","
+                                        <<
+                                        y2 << ")" << std::endl;
+                                    Cancellation_cnt += 2;
+                                    // for (auto& m : chessboard)
+                                    // {
+                                    //     for (int n : m)
+                                    //         std::cout << n << "\t ";
+                                    //     std::cout << std::endl;
+                                    // }
+                                    print_chessboard();
                                 }
                             }
                         }
@@ -118,7 +118,7 @@ int main()
                 }
             }
         }
-        std::cout<<std::endl<<"The Algorithm finished the Cancellation!"<<std::endl;
+        std::cout << std::endl << "The Algorithm finished the Cancellation!" << std::endl;
     }
 
 #endif
@@ -128,13 +128,13 @@ int main()
 void Templates_Init(std::vector<Mat>& templates)
 {
     Mat temp[7];
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/0.jpg"), temp[0], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/1.jpg"), temp[1], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/2.jpg"), temp[2], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/3.jpg"), temp[3], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/4.png"), temp[4], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/5.png"), temp[5], COLOR_BGR2GRAY);
-    cvtColor(imread("/home/dcy/CLionProjects/EtoVision/templates/6.jpg"), temp[6], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/0.jpg"), temp[0], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/1.jpg"), temp[1], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/2.jpg"), temp[2], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/3.jpg"), temp[3], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/4.png"), temp[4], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/5.png"), temp[5], COLOR_BGR2GRAY);
+    cvtColor(imread("../templates/6.jpg"), temp[6], COLOR_BGR2GRAY);
     for (auto& i : temp)
     {
         resize(i, i, Size(90, 85));
